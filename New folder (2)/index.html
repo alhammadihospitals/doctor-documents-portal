@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>بوابة استكمال مستندات الأطباء — مستشفيات الحمادي</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════ SCREEN: LOGIN ══════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-wrap" id="logo-login"><!-- SVG injected by JS --></div>
+        <h1 class="login-title">بوابة استكمال مستندات الأطباء</h1>
+        <p class="login-subtitle">Doctor Documents Completion Portal</p>
+        <p class="login-desc">يرجى تسجيل الدخول لاستعراض المستندات المطلوبة واستكمال رفع المرفقات الناقصة.</p>
+      </div>
+
+      <div class="login-body">
+        <!-- Tabs -->
+        <div class="login-tabs" role="tablist">
+          <button class="tab-btn active" onclick="switchTab('id')" id="tab-id" role="tab">
+            <span class="tab-icon">🪪</span> الرقم الوظيفي
+          </button>
+          <button class="tab-btn" onclick="switchTab('mobile')" id="tab-mobile" role="tab">
+            <span class="tab-icon">📱</span> رقم الجوال
+          </button>
+        </div>
+
+        <!-- Input: Employee ID -->
+        <div id="input-id" class="login-input-wrap">
+          <label class="field-label">الرقم الوظيفي <span class="required">*</span></label>
+          <div class="field-wrap">
+            <input type="text" id="inp-empid" class="field-input" inputmode="numeric"
+              placeholder="أدخل رقمك الوظيفي" maxlength="10" autocomplete="off">
+            <span class="field-prefix-icon">🔢</span>
+          </div>
+        </div>
+
+        <!-- Input: Mobile -->
+        <div id="input-mobile" class="login-input-wrap" style="display:none">
+          <label class="field-label">رقم الجوال <span class="required">*</span></label>
+          <div class="field-wrap">
+            <input type="text" id="inp-mobile" class="field-input" inputmode="numeric"
+              placeholder="05XXXXXXXX" maxlength="10" autocomplete="off">
+            <span class="field-prefix-icon">📱</span>
+          </div>
+        </div>
+
+        <div class="login-error" id="login-err">
+          <span class="err-icon">⚠️</span>
+          <span id="login-err-msg">لم يتم العثور على بياناتك. تحقق من الرقم وحاول مجدداً.</span>
+        </div>
+
+        <button class="login-btn" id="login-btn" onclick="doLogin()">
+          <span id="login-btn-text">متابعة — Continue</span>
+          <span class="btn-arrow">←</span>
+          <span class="btn-spinner" id="login-spinner" style="display:none"></span>
+        </button>
+      </div>
+
+      <div class="login-footer-link">
+        <button class="admin-link" onclick="openAdminModal()">🔐 دخول الإدارة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="modal-overlay" id="admin-modal" onclick="closeAdminModal(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">دخول الإدارة</h2>
+        <button class="modal-close" onclick="closeAdminModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">كود الإدارة <span class="required">*</span></label>
+        <div class="field-wrap">
+          <input type="password" id="admin-code-inp" class="field-input"
+            placeholder="أدخل كود الإدارة" autocomplete="off">
+        </div>
+        <div class="login-error" id="admin-err" style="margin-top:10px">
+          <span class="err-icon">⚠️</span>
+          <span>كود الإدارة غير صحيح.</span>
+        </div>
+        <button class="login-btn" id="admin-btn" onclick="doAdminLogin()" style="margin-top:16px">
+          <span id="admin-btn-text">دخول</span>
+          <span class="btn-spinner" id="admin-spinner" style="display:none"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <p>جميع الحقوق محفوظة لدى مستشفيات الحمادي</p>
+    <p>© Al Hammadi Hospitals</p>
+  </footer>
+</div>
+
+<!-- ══════════════ SCREEN: PORTAL ══════════════ -->
+<div id="screen-portal" class="screen">
+  <header class="portal-header">
+    <div class="header-inner">
+      <div class="header-logo" id="logo-portal"><!-- SVG --></div>
+      <div class="header-info">
+        <span class="header-badge">بوابة المستندات</span>
+        <span class="header-name" id="header-name">د. —</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
+    </div>
+  </header>
+
+  <main class="portal-main">
+    <!-- Doctor Card -->
+    <div class="doctor-hero">
+      <div class="doctor-hero-inner">
+        <div class="doctor-avatar">👨‍⚕️</div>
+        <div class="doctor-info">
+          <h2 class="doctor-name" id="doc-name">—</h2>
+          <p class="doctor-meta" id="doc-meta">—</p>
+        </div>
+        <div class="doctor-stats">
+          <div class="stat-pill" id="stat-total">
+            <span class="stat-num">—</span>
+            <span class="stat-lbl">مستند ناقص</span>
+          </div>
+          <div class="stat-pill done" id="stat-done">
+            <span class="stat-num">0</span>
+            <span class="stat-lbl">تم التعامل معه</span>
+          </div>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          <span>التقدم</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="info-banner">
+      <span class="info-icon">ℹ️</span>
+      <div class="info-text">
+        لكل مستند ناقص يمكنك <strong>رفع الملف</strong> مباشرةً، أو إذا كان المستند غير متوفر حالياً
+        اكتب <strong>ملاحظة إجبارية</strong> توضح السبب. لن يُقبل الإرسال إلا بعد التعامل مع جميع المستندات.
+      </div>
+    </div>
+
+    <!-- Documents List -->
+    <div class="section-head">
+      <h3 class="section-title">
+        <span class="section-dot"></span>
+        المستندات المطلوبة
+      </h3>
+    </div>
+
+    <div id="docs-list" class="docs-list"></div>
+
+    <!-- Submit Button -->
+    <div class="submit-panel" id="submit-panel">
+      <button class="submit-btn" id="submit-btn" onclick="doSubmit()">
+        <span id="submit-btn-text">📤 إرسال المستندات للمراجعة</span>
+        <span class="btn-spinner" id="submit-spinner" style="display:none"></span>
+      </button>
+      <p class="submit-hint">بعد الإرسال لن تتمكن من التعديل. تأكد من اكتمال جميع المستندات.</p>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <p>جميع الحقوق محفوظة لدى مستشفيات الحمادي</p>
+    <p>© Al Hammadi Hospitals</p>
+  </footer>
+</div>
+
+<!-- ══════════════ SCREEN: SUCCESS ══════════════ -->
+<div id="screen-success" class="screen">
+  <div class="success-bg">
+    <div class="success-card">
+      <div class="success-logo" id="logo-success"><!-- SVG --></div>
+      <div class="success-anim">
+        <div class="success-ring">
+          <svg viewBox="0 0 80 80" class="check-svg">
+            <circle cx="40" cy="40" r="36" class="check-circle"/>
+            <path d="M24 40 l10 10 l20-20" class="check-path"/>
+          </svg>
+        </div>
+      </div>
+      <h2 class="success-title">تم استلام مستنداتكم بنجاح</h2>
+      <p class="success-sub" id="success-sub">شكراً لك، سيتم مراجعة المرفقات والملاحظات من قبل الفريق المختص.</p>
+
+      <div class="success-details">
+        <div class="detail-row">
+          <span class="detail-label">🔖 رقم الطلب</span>
+          <span class="detail-val" id="suc-id">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">🕐 تاريخ الإرسال</span>
+          <span class="detail-val" id="suc-date">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">📎 ملفات مرفوعة</span>
+          <span class="detail-val" id="suc-files">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">📝 ملاحظات مقدَّمة</span>
+          <span class="detail-val" id="suc-notes">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">📊 الحالة</span>
+          <span class="detail-val badge-review">⏳ قيد المراجعة</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="page-footer">
+    <p>جميع الحقوق محفوظة لدى مستشفيات الحمادي</p>
+    <p>© Al Hammadi Hospitals</p>
+  </footer>
+</div>
+
+<!-- ══════════════ SCREEN: ADMIN ══════════════ -->
+<div id="screen-admin" class="screen">
+  <header class="portal-header">
+    <div class="header-inner">
+      <div class="header-logo" id="logo-admin"><!-- SVG --></div>
+      <div class="header-info">
+        <span class="header-badge admin-badge">لوحة الإدارة</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <!-- KPI Cards -->
+    <div class="kpi-row" id="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-icon">👥</span>
+        <span class="kpi-num" id="kpi-total">—</span>
+        <span class="kpi-lbl">إجمالي الأطباء</span>
+      </div>
+      <div class="kpi-card green">
+        <span class="kpi-icon">✅</span>
+        <span class="kpi-num" id="kpi-complete">—</span>
+        <span class="kpi-lbl">مكتملون</span>
+      </div>
+      <div class="kpi-card amber">
+        <span class="kpi-icon">⏳</span>
+        <span class="kpi-num" id="kpi-partial">—</span>
+        <span class="kpi-lbl">جزئي</span>
+      </div>
+      <div class="kpi-card red">
+        <span class="kpi-icon">📋</span>
+        <span class="kpi-num" id="kpi-notstarted">—</span>
+        <span class="kpi-lbl">لم يبدأوا</span>
+      </div>
+      <div class="kpi-card blue">
+        <span class="kpi-icon">📎</span>
+        <span class="kpi-num" id="kpi-files">—</span>
+        <span class="kpi-lbl">ملفات مرفوعة</span>
+      </div>
+      <div class="kpi-card purple">
+        <span class="kpi-icon">📝</span>
+        <span class="kpi-num" id="kpi-notes-count">—</span>
+        <span class="kpi-lbl">ملاحظات</span>
+      </div>
+    </div>
+
+    <!-- Avg completion -->
+    <div class="avg-bar-wrap">
+      <div class="avg-labels">
+        <span>متوسط نسبة الاكتمال</span>
+        <span id="avg-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="avg-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="admin-controls">
+      <input type="text" id="admin-search" class="admin-search" placeholder="🔍 بحث باسم أو رقم الطبيب...">
+      <button class="export-btn" onclick="exportCSV()">📥 تصدير Excel/CSV</button>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-table-wrap">
+      <table class="admin-table" id="admin-table">
+        <thead>
+          <tr>
+            <th>الرقم الوظيفي</th>
+            <th>اسم الطبيب</th>
+            <th>الجوال</th>
+            <th>القسم</th>
+            <th>التخصص</th>
+            <th>المطلوب</th>
+            <th>المرفوع</th>
+            <th>الملاحظات</th>
+            <th>الاكتمال %</th>
+            <th>الحالة</th>
+            <th>آخر تحديث</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Doctor Detail Modal -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
+    <div class="modal-card large">
+      <div class="modal-header">
+        <h2 class="modal-title" id="detail-title">تفاصيل الطبيب</h2>
+        <button class="modal-close" onclick="closeDetailModal()">✕</button>
+      </div>
+      <div class="modal-body" id="detail-body"></div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <p>جميع الحقوق محفوظة لدى مستشفيات الحمادي</p>
+    <p>© Al Hammadi Hospitals</p>
+  </footer>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="script.js"></script>
+</body>
+</html>
